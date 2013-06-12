@@ -5,6 +5,7 @@ all_from 'lib/Apache2/MimeInfo.pm';
 author   q{Dorian Taylor <dorian@cpan.org>};
 license  'apache';
 
+requires 'mod_perl2';
 requires 'File::MimeInfo';
 requires 'IO::Scalar';
 

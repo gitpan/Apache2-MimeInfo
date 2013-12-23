@@ -18,10 +18,10 @@ META.yml
 MYMETA.json
 MYMETA.yml
 README
-t/00-load.t
 t/boilerplate.t
 t/conf/extra.last.conf.in
 t/htdocs/cart.html
+t/htdocs/index.html
 t/htdocs/test.docx
 t/manifest.t
 t/pod-coverage.t

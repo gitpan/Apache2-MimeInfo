@@ -22,10 +22,11 @@ use IO::Scalar ();
 
 BEGIN {
     # do this because holy god File::BaseDir is annoying
-    local $ENV{HOME};
+    # no need to local
+    #local $ENV{HOME};
     if ($ENV{MOD_PERL}) {
         use Apache2::ServerUtil ();
-        $ENV{HOME} = Apache2::ServerUtil::server_root();
+        $ENV{HOME} ||= Apache2::ServerUtil::server_root();
     }
 
     # shut UPPP
@@ -38,11 +39,11 @@ Apache2::MimeInfo - Content-Type header informed by File::MimeInfo
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 
 =head1 SYNOPSIS
@@ -53,6 +54,12 @@ our $VERSION = '0.02';
 =head1 DESCRIPTION
 
 =cut
+
+my %SKIP = (
+    'application/x-gzip'     => 1,
+    'application/x-compress' => 1,
+    'application/x-bzip2'    => 1,
+);
 
 sub handler : FilterRequestHandler {
     my ($f, $bb) = @_;
@@ -71,6 +78,10 @@ sub handler : FilterRequestHandler {
             $r->log->debug("Content type asserted: $type, Detected: $mt");
             if ($mg->mimetype_isa($type, $mt)) {
                 $r->log->debug("Leaving more-specific type alone");
+            }
+            elsif ($SKIP{$mt}) {
+                # one day we can actually inspect the uncompressed contents.
+                $r->log->debug("Not replacing $type with $mt.");
             }
             else {
                 $r->log->debug("Replacing content type on " . $r->uri);

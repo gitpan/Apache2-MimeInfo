@@ -5,12 +5,13 @@ all_from 'lib/Apache2/MimeInfo.pm';
 author   q{Dorian Taylor <dorian@cpan.org>};
 license  'apache';
 
+configure_requires 'Apache::Test';
+build_requires 'Test::More';
+
 requires 'mod_perl2';
 requires 'File::MimeInfo';
 requires 'IO::Scalar';
 
-build_requires 'Test::More';
-build_requires 'Apache::Test';
 
 clean_files 't/TEST t/SMOKE';
 

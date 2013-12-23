@@ -39,11 +39,11 @@ Apache2::MimeInfo - Content-Type header informed by File::MimeInfo
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 
 =head1 SYNOPSIS
@@ -52,6 +52,12 @@ our $VERSION = '0.03';
     PerlOutputFilterHandler Apache2::MimeInfo
 
 =head1 DESCRIPTION
+
+This module bolts L<File::MimeInfo::Magic> and the
+L<shared-mime-info|http://freedesktop.org/wiki/Software/shared-mime-info/>
+database to Apache 2. Insert L<Apache2::MimeInfo> as an output filter
+as described in the synopsis to perform content-based type checking
+against a more robust database than C</etc/mime.types>.
 
 =cut
 
@@ -139,6 +145,8 @@ L<http://search.cpan.org/dist/Apache2-MimeInfo/>
 =over 4
 
 =item L<File::MimeInfo>
+
+=item L<http://perl.apache.org/>
 
 =back
 

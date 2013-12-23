@@ -4,10 +4,10 @@ author:
   - 'Dorian Taylor, C<< <dorian at cpan.org> >>'
   - 'Dorian Taylor <dorian@cpan.org>'
 build_requires:
-  Apache::Test: 0
   ExtUtils::MakeMaker: 6.59
   Test::More: 0
 configure_requires:
+  Apache::Test: 0
   ExtUtils::MakeMaker: 6.59
 distribution_type: module
 dynamic_config: 1
@@ -28,4 +28,4 @@ requires:
   perl: 5.10.0
 resources:
   license: http://apache.org/licenses/LICENSE-2.0
-version: 0.03
+version: 0.04

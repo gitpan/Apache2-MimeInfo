@@ -35,15 +35,15 @@ BEGIN {
 
 =head1 NAME
 
-Apache2::MimeInfo - Content-Type header informed by File::MimeInfo
+Apache2::MimeInfo - Content-Type header informed by shared-mime-info
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 
 =head1 SYNOPSIS
@@ -55,9 +55,28 @@ our $VERSION = '0.04';
 
 This module bolts L<File::MimeInfo::Magic> and the
 L<shared-mime-info|http://freedesktop.org/wiki/Software/shared-mime-info/>
-database to Apache 2. Insert L<Apache2::MimeInfo> as an output filter
-as described in the synopsis to perform content-based type checking
-against a more robust database than C</etc/mime.types>.
+database to Apache 2.x. Its purpose is to clean up C<Content-Type>
+headers on responses that come from potentially misconfigured or
+untrustworthy sources (e.g. a proxy).
+
+Insert L<Apache2::MimeInfo> as an output filter as described in the
+synopsis to perform content-based type checking against a more robust
+database than C</etc/mime.types>. The type asserted by the original
+content handler will be overridden by this filter unless the asserted
+type is a more specific instance of a more general I<detected>
+type. For instance, Microsoft's C<.docx> format is a ZIP file with
+special contents. Its MIME type is this:
+
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document
+
+The detector, however, will perceive C<application/zip>, which is an
+ancestor type. If whatever content handler producing the document
+asserts the correct type, then this module will do nothing. If,
+however, it returns something like C<application/octet-stream>, which
+is even more generic than C<application/zip>, this module will replace
+the C<Content-Type> header with C<application/zip>. It will likewise
+replace the C<Content-Type> header if it is missing altogether, or if
+it asserts a type that is inconsitent with the one which was detected.
 
 =cut
 
@@ -66,6 +85,28 @@ my %SKIP = (
     'application/x-compress' => 1,
     'application/x-bzip2'    => 1,
 );
+
+# File::MimeInfo::mimetype_isa only tells you if the child type is an
+# immediate descendant of its parent, which is practically useless.
+sub _mimetype_isa_really {
+    my ($child, $ancestor) = @_;
+    my @q = ($child);
+    my %t;
+    do {
+        for my $t (File::MimeInfo::mimetype_isa(shift @q)) {
+            $t = lc $t; # JIC
+            push @q, $t unless defined $t{$t};
+            $t{$t}++;
+        }
+    } while @q;
+
+    if (defined $ancestor) {
+        return !!$t{$ancestor};
+    }
+    else {
+        return sort keys %t;
+    }
+}
 
 sub handler : FilterRequestHandler {
     my ($f, $bb) = @_;
@@ -80,9 +121,9 @@ sub handler : FilterRequestHandler {
         if ($b->read(my $data)) {
             my $io = IO::Scalar->new(\$data);
             my $mg = File::MimeInfo::Magic->new;
-            my $mt = $mg->mimetype($io);
+            my $mt = File::MimeInfo::Magic::mimetype($io);
             $r->log->debug("Content type asserted: $type, Detected: $mt");
-            if ($mg->mimetype_isa($type, $mt)) {
+            if (_mimetype_isa_really($type, $mt)) {
                 $r->log->debug("Leaving more-specific type alone");
             }
             elsif ($SKIP{$mt}) {
@@ -97,7 +138,11 @@ sub handler : FilterRequestHandler {
 
         $f->ctx(1);
     }
-    Apache2::Const::DECLINED;
+
+    my $rv = $f->next->pass_brigade($bb);
+    return $rv unless $rv == APR::Const::SUCCESS;
+
+    return Apache2::Const::OK;
 }
 
 =head1 AUTHOR

@@ -30,8 +30,7 @@
       },
       "configure" : {
          "requires" : {
-            "Apache::Test" : "0",
-            "ExtUtils::MakeMaker" : "6.59"
+            "ExtUtils::MakeMaker" : "0"
          }
       },
       "runtime" : {
@@ -49,5 +48,5 @@
          "http://apache.org/licenses/LICENSE-2.0"
       ]
    },
-   "version" : "0.03"
+   "version" : "0.04"
 }

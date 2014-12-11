@@ -39,12 +39,11 @@ Apache2::MimeInfo - Content-Type header informed by shared-mime-info
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
-
+our $VERSION = '0.06';
 
 =head1 SYNOPSIS
 
@@ -61,7 +60,8 @@ untrustworthy sources (e.g. a proxy).
 
 Insert L<Apache2::MimeInfo> as an output filter as described in the
 synopsis to perform content-based type checking against a more robust
-database than C</etc/mime.types>. The type asserted by the original
+database than the one that comes along with
+L<file|http://darwinsys.com/file/>. The type asserted by the original
 content handler will be overridden by this filter unless the asserted
 type is a more specific instance of a more general I<detected>
 type. For instance, Microsoft's C<.docx> format is a ZIP file with
@@ -77,6 +77,13 @@ is even more generic than C<application/zip>, this module will replace
 the C<Content-Type> header with C<application/zip>. It will likewise
 replace the C<Content-Type> header if it is missing altogether, or if
 it asserts a type that is inconsitent with the one which was detected.
+
+If you aren't familiar with
+L<shared-mime-info|http://freedesktop.org/wiki/Software/shared-mime-info/>,
+it's an XML database containing useful information about the mappings
+of, and relations between MIME types. This means that you can hack new
+type signatures into it, just as you can with
+L<file|http://darwinsys.com/file/>.
 
 =cut
 
@@ -190,6 +197,8 @@ L<http://search.cpan.org/dist/Apache2-MimeInfo/>
 =over 4
 
 =item L<File::MimeInfo>
+
+=item L<File::MMagic>
 
 =item L<http://perl.apache.org/>
 
